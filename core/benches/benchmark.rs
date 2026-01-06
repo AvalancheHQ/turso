@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use codspeed_criterion_compat::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use pprof::criterion::{Output, PProfProfiler};
 use regex::Regex;
 use std::{sync::Arc, time::Instant};
@@ -231,7 +231,7 @@ fn bench_alter(criterion: &mut Criterion) {
                         let elapsed = {
                             let start = Instant::now();
                             conn.execute("ALTER TABLE x ADD COLUMN b", ()).unwrap();
-                            start.elapsed()
+                            start.elapsed();
                         };
                         conn.execute("DROP TABLE x", ()).unwrap();
                         elapsed
