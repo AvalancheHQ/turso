@@ -1,0 +1,40 @@
+name: CodSpeed
+'on':
+  push:
+    branches:
+    - main
+  pull_request: null
+  workflow_dispatch: null
+permissions:
+  contents: read
+  id-token: write
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: '0'
+  CARGO_NET_RETRY: 10
+jobs:
+  codspeed:
+    name: Run benchmarks
+    runs-on: blacksmith-4vcpu-ubuntu-2404
+    timeout-minutes: 30
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@stable
+    - name: Setup mold linker
+      uses: rui314/setup-mold@v1
+    - uses: Swatinem/rust-cache@v2
+      with:
+        prefix-key: v1-rust-codspeed
+        cache-on-failure: true
+    - name: Install cargo-codspeed
+      uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-codspeed@4.2.0
+    - name: Build the benchmark target(s)
+      run: cargo codspeed build
+    - name: Run the benchmarks
+      uses: CodSpeedHQ/action@v4.5.2
+      with:
+        upload-url: ${{ secrets.CODSPEED_FRANCOIS_DEV_UPLOAD_URL }}
+        mode: simulation
+        run: cargo codspeed run
