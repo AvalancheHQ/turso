@@ -1,5 +1,4 @@
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
-use pprof::criterion::{Output, PProfProfiler};
 use regex::Regex;
 use std::{sync::Arc, time::Instant};
 use tempfile::TempDir;
@@ -1018,7 +1017,7 @@ fn bench_insert_randomblob(criterion: &mut Criterion) {
 
 criterion_group! {
     name = benches;
-    config = Criterion::default().with_profiler(PProfProfiler::new(100, Output::Flamegraph(None)));
+    config = Criterion::default();
     targets = bench_open, bench_alter, bench_prepare_query, bench_execute_select_1, bench_execute_select_rows, bench_execute_select_count, bench_insert_rows, bench_concurrent_writes, bench_insert_randomblob
 }
 criterion_main!(benches);

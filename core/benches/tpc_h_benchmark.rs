@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, SamplingMode};
-use pprof::criterion::{Output, PProfProfiler};
 use turso_core::{Database, PlatformIO};
 
 const TPC_H_PATH: &str = "../perf/tpc-h/TPC-H.db";
@@ -136,7 +135,7 @@ fn bench_tpc_h_queries(criterion: &mut Criterion) {
 
 criterion_group! {
     name = benches;
-    config = Criterion::default().with_profiler(PProfProfiler::new(100, Output::Flamegraph(None)));
+    config = Criterion::default();
     targets = bench_tpc_h_queries
 }
 criterion_main!(benches);

@@ -1,5 +1,4 @@
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
-use pprof::criterion::{Output, PProfProfiler};
 use turso_parser::{lexer::Lexer, parser::Parser};
 
 fn bench_parser(criterion: &mut Criterion) {
@@ -65,9 +64,10 @@ fn bench_lexer(criterion: &mut Criterion) {
     }
 }
 
-criterion_group! {
-    name = benches;
-    config = Criterion::default().with_profiler(PProfProfiler::new(100, Output::Flamegraph(None)));
-    targets = bench_parser, bench_parser_insert_batch, bench_lexer
-}
+criterion_group!(
+    benches,
+    bench_parser,
+    bench_parser_insert_batch,
+    bench_lexer
+);
 criterion_main!(benches);

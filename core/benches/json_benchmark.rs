@@ -1,8 +1,4 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use pprof::{
-    criterion::{Output, PProfProfiler},
-    flamegraph::Options,
-};
 use std::sync::Arc;
 use turso_core::{Database, PlatformIO};
 
@@ -936,7 +932,7 @@ fn bench_json_patch(criterion: &mut Criterion) {
 
 criterion_group! {
     name = benches;
-    config = Criterion::default().with_profiler(PProfProfiler::new(100, Output::Flamegraph(Some(Options::default()))));
+    config = Criterion::default();
     targets = bench, bench_sequential_jsonb, bench_json_patch
 }
 
