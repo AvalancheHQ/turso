@@ -84,7 +84,7 @@ indexmap = "2.11.1"
 miette = "7.6.0"
 bitflags = "2.9.4"
 fallible-iterator = "0.3.0"
-criterion = "0.5"
+criterion = { version = "4.2.0", package = "codspeed-criterion-compat" }
 chrono = { version = "0.4.42", default-features = false }
 hex = "0.4"
 antithesis_sdk = { version = "0.2", default-features = false }
