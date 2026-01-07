@@ -1,0 +1,94 @@
+name: CodSpeed
+'on':
+  push:
+    branches:
+    - main
+  pull_request: null
+  workflow_dispatch: null
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  benchmarks:
+    name: Run benchmarks
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+    - name: Setup Rust cache
+      uses: Swatinem/rust-cache@v2
+      with:
+        prefix-key: v1-rust
+        cache-on-failure: true
+    - name: Install cargo-codspeed
+      uses: useblacksmith/cache@v5
+      id: cache-cargo-codspeed
+      with:
+        path: ~/.cargo/bin/cargo-codspeed
+        key: cargo-codspeed-${{ runner.os }}
+    - name: Install cargo-codspeed binary
+      if: steps.cache-cargo-codspeed.outputs.cache-hit != 'true'
+      run: cargo install cargo-codspeed --version 4.2.0
+    - name: Download testing database
+      run: "mkdir -p testing\nif [ ! -f testing/testing.db ]; then\n  wget -q https://github.com/tursodatabase/turso/raw/refs/heads/main/testing/testing.db\
+        \ -O testing/testing.db || echo \"Could not download testing.db, will be created\
+        \ during benchmarks\"\nfi\n"
+    - name: Build benchmarks
+      run: cargo codspeed build -p turso_core
+    - name: Run benchmarks with CodSpeed
+      uses: CodSpeedHQ/action@v4
+      with:
+        upload-url: ${{ secrets.CODSPEED_FRANCOIS_DEV_UPLOAD_URL }}
+        mode: simulation
+        run: cargo codspeed run -p turso_core
+  tpc-h:
+    name: Run TPC-H benchmarks
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      DB_FILE: perf/tpc-h/TPC-H.db
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+    - name: Setup Rust cache
+      uses: Swatinem/rust-cache@v2
+      with:
+        prefix-key: v1-rust
+        cache-on-failure: true
+    - name: Install cargo-codspeed
+      uses: useblacksmith/cache@v5
+      id: cache-cargo-codspeed
+      with:
+        path: ~/.cargo/bin/cargo-codspeed
+        key: cargo-codspeed-${{ runner.os }}
+    - name: Install cargo-codspeed binary
+      if: steps.cache-cargo-codspeed.outputs.cache-hit != 'true'
+      run: cargo install cargo-codspeed --version 4.2.0
+    - name: Cache TPC-H database
+      id: cache-tpc-h
+      uses: useblacksmith/cache@v5
+      with:
+        path: ${{ env.DB_FILE }}
+        key: tpc-h
+    - name: Download TPC-H database
+      if: steps.cache-tpc-h.outputs.cache-hit != 'true'
+      env:
+        DB_URL: https://github.com/lovasoa/TPCH-sqlite/releases/download/v1.0/TPC-H.db
+      run: 'mkdir -p $(dirname $DB_FILE)
+
+        wget -O $DB_FILE --no-verbose $DB_URL
+
+        '
+    - name: Build TPC-H benchmarks
+      run: cargo codspeed build --bench tpc_h_benchmark -p
+        turso_core
+    - name: Run TPC-H benchmarks with CodSpeed
+      uses: CodSpeedHQ/action@v4
+      with:
+        upload-url: ${{ secrets.CODSPEED_FRANCOIS_DEV_UPLOAD_URL }}
+        mode: simulation
+        run: cargo codspeed run --bench tpc_h_benchmark -p
+          turso_core
