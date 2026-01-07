@@ -36,13 +36,13 @@ jobs:
         \ -O testing/testing.db || echo \"Could not download testing.db, will be created\
         \ during benchmarks\"\nfi\n"
     - name: Build benchmarks
-      run: cargo codspeed build --features bench-profile -p turso_core
+      run: cargo codspeed build -p turso_core
     - name: Run benchmarks with CodSpeed
       uses: CodSpeedHQ/action@v4
       with:
         upload-url: ${{ secrets.CODSPEED_FRANCOIS_DEV_UPLOAD_URL }}
         mode: simulation
-        run: cargo codspeed run --features bench-profile -p turso_core
+        run: cargo codspeed run -p turso_core
   tpc-h:
     name: Run TPC-H benchmarks
     runs-on: ubuntu-latest
@@ -83,12 +83,12 @@ jobs:
 
         '
     - name: Build TPC-H benchmarks
-      run: cargo codspeed build --bench tpc_h_benchmark --features bench-profile -p
+      run: cargo codspeed build --bench tpc_h_benchmark -p
         turso_core
     - name: Run TPC-H benchmarks with CodSpeed
       uses: CodSpeedHQ/action@v4
       with:
         upload-url: ${{ secrets.CODSPEED_FRANCOIS_DEV_UPLOAD_URL }}
         mode: simulation
-        run: cargo codspeed run --bench tpc_h_benchmark --features bench-profile -p
+        run: cargo codspeed run --bench tpc_h_benchmark -p
           turso_core
